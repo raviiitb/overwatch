@@ -4,4 +4,7 @@ class Api::HeroesController < ApplicationController
 
   def show
   end
+
+  def abilities
+  end
 end
