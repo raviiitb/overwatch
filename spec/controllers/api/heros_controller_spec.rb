@@ -21,7 +21,6 @@ RSpec.describe Api::HerosController, type: :controller do
       get :show, params: { id: 1 }
       expect(response).to have_http_status(:success)
       expect(response).to have_http_status(:success)
-      binding.pry
       expect(JSON.parse(response.body)['data']['attributes']).to include('overwatch-id', 'name', 'real-name', 'health', 'armour', 'shield')
     end
   end
