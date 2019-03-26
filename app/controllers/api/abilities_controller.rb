@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class Api::AbilitiesController < ApplicationController
+  #  GET /abilities
   def index
     response = @client.call('/ability', index_params)
     if response.code == 304
@@ -13,11 +14,12 @@ class Api::AbilitiesController < ApplicationController
     end
   end
 
+  # GET /ability/:id
   def show
     response = @client.call("/ability/#{params[:id]}")
-    if response.code == 304
+    if response.code == 304 # Stale response
       render json: ability
-    elsif response.code == 200
+    elsif response.code == 200 # Fresh response
       response_hash = response.to_h
       Ability.update_or_create_by(response_hash['id'], Ability.slice_attributes(response_hash))
       render json: ability
@@ -44,6 +46,7 @@ class Api::AbilitiesController < ApplicationController
     Ability.find_by(overwatch_id: params[:id])
   end
 
+  # Update the Ability table if the response from remote has been changed
   def update_abilities_table(response)
     response.to_h['data'].map do |ability_attr|
       Ability.update_or_create_by(ability_attr['id'], Ability.slice_attributes(ability_attr))

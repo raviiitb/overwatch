@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Api::HerosController < ApplicationController
+  
+  # GET /heros
   def index
     response = @client.call('/hero', index_params.to_h)
     if response.code == 304
@@ -13,13 +15,13 @@ class Api::HerosController < ApplicationController
     end
   end
 
+  # GET /heros/:id
   def show
     response = @client.call("/hero/#{params[:id]}")
     @hero = hero(params[:id])
-
-    if response.code == 304
+    if response.code == 304 # Stale response
       render json: hero(params[:id])
-    elsif response.code == 200
+    elsif response.code == 200 # Fresh response
       create_hero_entity_relationship(params[:id], response.to_h)
       render json: hero(params[:id])
     else
@@ -27,11 +29,12 @@ class Api::HerosController < ApplicationController
     end
   end
 
+  # GET /heros/:hero_id/abilities
   def hero_abilities
     response = @client.call("/hero/#{params[:hero_id]}")
-    if response.code == 304
+    if response.code == 304 # Stale response
       render json: hero(params[:hero_id]).abilities.page
-    elsif response.code == 200
+    elsif response.code == 200 # Fresh response
       create_hero_entity_relationship(params[:hero_id], response.to_h)
       render json: hero(params[:hero_id]).abilities.page
     else
@@ -57,6 +60,7 @@ class Api::HerosController < ApplicationController
     @hero ||= Hero.find_by(overwatch_id: id)
   end
 
+  # Add Many to Many relationship between Hero and Ability 
   def create_hero_entity_relationship(hero_id, response_hash)
     Hero.update_or_create_by(response_hash['id'], Hero.slice_attributes(response_hash))
     Ability.update_abilities_table(response_hash['abilities'])
